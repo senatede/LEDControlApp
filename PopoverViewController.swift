@@ -1,195 +1,94 @@
 import Cocoa
 
-class FlippedView: NSView {
-    override var isFlipped: Bool { return true }
-}
-
 class PopoverViewController: NSViewController {
 
+    // MARK: - State
+
     var power: Bool = false {
-        didSet {
-            updatePowerButton()
-        }
+        didSet { updatePowerButton() }
     }
 
-    let powerButton = NSButton()
-    let brightnessSlider = BrightnessSliderView(frame: .zero)
-    let expandButton = NSButton()
     var isExpanded: Bool = false {
         didSet {
             updateExpandButton()
             updateExpandedContent()
         }
     }
-    let expandedLabel = NSTextField(labelWithString: "Expanded menu")
-    let devicePopup = NSPopUpButton()
+
+    // MARK: - Views
+
+    let powerButton     = NSButton()
+    let brightnessSlider = BrightnessSliderView(frame: .zero)
+    let expandButton    = NSButton()
+
+    let expandedContainer = NSView(frame: NSRect(x: 0, y: 50, width: 300, height: 130))
+    let separatorLine   = NSBox()
+    let serialPort      = NSButton()
+    let devicePopup     = NSPopUpButton()
+    let numLedsLabel    = NSButton()
+    let numLedsField    = NSTextField()
+    let quitButton      = HoverButton()
+    let fpsLabel        = NSTextField(labelWithString: "FPS: 0")
+
+    // MARK: - Lifecycle
 
     override func loadView() {
-        let height: CGFloat = isExpanded ? 200 : 70
-        let frame = NSRect(x: 0, y: 0, width: 300, height: height)
-        self.view = FlippedView(frame: frame)
-        self.preferredContentSize = NSSize(width: 300, height: height)
-        resizePopover(toHeight: height)
+        let height: CGFloat = isExpanded ? 180 : 70
+        view = FlippedView(frame: NSRect(x: 0, y: 0, width: 300, height: height))
+        view.wantsLayer = true
+        preferredContentSize = NSSize(width: 300, height: height)
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         setupPowerButton()
         setupBrightnessSlider()
+        setupExpandedUI()
         setupExpandButton()
-        setupExpandedLabel()
-        setupDevicePopup()
     }
-
-    func setupPowerButton() {
-        powerButton.translatesAutoresizingMaskIntoConstraints = false
-        powerButton.bezelStyle = .shadowlessSquare
-        powerButton.isBordered = false
-        powerButton.imageScaling = .scaleProportionallyDown
-        powerButton.target = self
-        powerButton.action = #selector(togglePower)
-        updatePowerButton()
-        view.addSubview(powerButton)
-        NSLayoutConstraint.activate([
-            powerButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 14),
-            powerButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
-            powerButton.widthAnchor.constraint(equalToConstant: 40),
-            powerButton.heightAnchor.constraint(equalToConstant: 40)
-        ])
-    }
-
-    func updatePowerButton() {
-        powerButton.image = NSImage(named: power ? "on" : "off")
-    }
-
-    @objc func togglePower() {
-        power.toggle()
-        updatePowerButton()
-        if !power {
-            powerOff()
-        }
-        print("Power is now \(power ? "ON" : "OFF")")
-    }
-
-    func powerOff() {
-        print("Powering off")
-    }
-
-    func setupBrightnessSlider() {
-        brightnessSlider.translatesAutoresizingMaskIntoConstraints = false
-        brightnessSlider.wantsLayer = true
-        brightnessSlider.layer?.cornerRadius = 25 / 2
-        brightnessSlider.target = self
-        brightnessSlider.action = #selector(brightnessChanged(_:))
-        view.addSubview(brightnessSlider)
-        NSLayoutConstraint.activate([
-            brightnessSlider.leadingAnchor.constraint(equalTo: powerButton.trailingAnchor, constant: 9),
-            brightnessSlider.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -15),
-            brightnessSlider.topAnchor.constraint(equalTo: powerButton.topAnchor, constant: 5),
-            brightnessSlider.heightAnchor.constraint(equalToConstant: 33)
-        ])
-    }
-
-    @objc func brightnessChanged(_ sender: BrightnessSliderView) {
-        print("Brightness changed to \(sender.value)")
-    }
-
-    func setupExpandButton() {
-        expandButton.translatesAutoresizingMaskIntoConstraints = false
-        expandButton.bezelStyle = .shadowlessSquare
-        expandButton.isBordered = false
-        expandButton.imageScaling = .scaleNone
-        expandButton.imagePosition = .imageOnly
-        expandButton.target = self
-        expandButton.action = #selector(toggleExpanded)
-        updateExpandButton()
-        view.addSubview(expandButton)
-        NSLayoutConstraint.activate([
-            expandButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            expandButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -5),
-            expandButton.widthAnchor.constraint(equalToConstant: 40),
-            expandButton.heightAnchor.constraint(equalToConstant: 10)
-        ])
-    }
-
-    func updateExpandButton() {
-        let imageName = isExpanded ? "up" : "down"
-        if let original = NSImage(named: imageName) {
-            let resized = NSImage(size: NSSize(width: 15, height: 5))
-            resized.lockFocus()
-            original.draw(in: NSRect(x: 0, y: 0, width: 15, height: 5),
-                          from: NSRect(origin: .zero, size: original.size),
-                          operation: .copy,
-                          fraction: 1.0)
-            resized.unlockFocus()
-            expandButton.image = resized
-        } else {
-            expandButton.image = nil
-        }
-        expandButton.title = ""
-    }
-
-    func setupExpandedLabel() {
-        expandedLabel.translatesAutoresizingMaskIntoConstraints = false
-        expandedLabel.isHidden = true
-        view.addSubview(expandedLabel)
-
-        NSLayoutConstraint.activate([
-            expandedLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            expandedLabel.topAnchor.constraint(equalTo: powerButton.bottomAnchor, constant: 20)
-        ])
-    }
-
-    func setupDevicePopup() {
-        devicePopup.translatesAutoresizingMaskIntoConstraints = false
-        devicePopup.addItems(withTitles: ["Device 1", "Device 2", "Device 3"])
-        devicePopup.target = self
-        devicePopup.action = #selector(deviceSelected(_:))
-        devicePopup.isHidden = true
-        view.addSubview(devicePopup)
-
-        NSLayoutConstraint.activate([
-            devicePopup.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            devicePopup.topAnchor.constraint(equalTo: expandedLabel.bottomAnchor, constant: 10),
-            devicePopup.widthAnchor.constraint(equalToConstant: 150),
-            devicePopup.heightAnchor.constraint(equalToConstant: 25)
-        ])
-    }
-
-    @objc func deviceSelected(_ sender: NSPopUpButton) {
-        print("Selected device: \(sender.titleOfSelectedItem ?? "")")
-    }
-
-    func updateExpandedContent() {
-        if isExpanded {
-            expandedLabel.isHidden = false
-            devicePopup.isHidden = false
-            resizePopover(toHeight: 200)
-        } else {
-            expandedLabel.isHidden = true
-            devicePopup.isHidden = true
-            resizePopover(toHeight: 70)
-        }
-
-    }
-
-    func resizePopover(toHeight newHeight: CGFloat) {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            self.preferredContentSize = NSSize(width: 300, height: newHeight)
-        }
-    }
-
-    @objc func toggleExpanded() {
-        isExpanded.toggle()
-    }
-
 
     override func viewDidAppear() {
         super.viewDidAppear()
-        resizePopover(toHeight: isExpanded ? 200 : 70)
+        preferredContentSize = NSSize(width: 300, height: isExpanded ? 180 : 70)
+    }
+
+    // MARK: - UI State
+
+    func updateExpandedContent() {
+        let expanding = isExpanded
+        let newHeight: CGFloat = expanding ? 180 : 70
+
+        if expanding {
+            expandedContainer.isHidden = false
+        }
+
+        // NSPopover natively animates its size change when preferredContentSize changes
+        preferredContentSize = NSSize(width: 300, height: newHeight)
+
+        NSAnimationContext.runAnimationGroup({ context in
+            context.duration = 0.25
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            expandedContainer.animator().alphaValue = expanding ? 1.0 : 0.0
+        }, completionHandler: {
+            if !expanding {
+                self.expandedContainer.isHidden = true
+            }
+        })
+    }
+
+    // MARK: - Backend Integration
+
+    /// Call this from the backend to update the displayed FPS counter.
+    func updateFPS(_ fps: Int) {
+        fpsLabel.stringValue = "FPS: \(fps)"
+    }
+
+    /// Call this from the backend to populate the serial device dropdown.
+    func updateSerialDevices(_ devices: [String]) {
+        devicePopup.removeAllItems()
+        devicePopup.addItems(withTitles: devices)
+        if let first = devices.first {
+            devicePopup.selectItem(withTitle: first)
+        }
     }
 }
-
