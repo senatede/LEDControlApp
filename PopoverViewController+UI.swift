@@ -131,11 +131,11 @@ extension PopoverViewController {
         devicePopup.action = #selector(deviceSelected(_:))
         expandedContainer.addSubview(devicePopup)
 
-        // Number of LEDs Label
+        // Total Number of LEDs Label
         numLedsLabel.translatesAutoresizingMaskIntoConstraints = false
         numLedsLabel.isBordered = false
         numLedsLabel.bezelStyle = .shadowlessSquare
-        numLedsLabel.title = "Number of leds:"
+        numLedsLabel.title = "Total number of leds:"
         numLedsLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
         numLedsLabel.imagePosition = .imageLeft
         numLedsLabel.alignment = .left
@@ -144,13 +144,61 @@ extension PopoverViewController {
         numLedsLabel.contentTintColor = .secondaryLabelColor
         expandedContainer.addSubview(numLedsLabel)
 
-        // Number of LEDs Field
+        // Total Number of LEDs Field
         numLedsField.translatesAutoresizingMaskIntoConstraints = false
-        numLedsField.stringValue = "67"
+        numLedsField.stringValue = "114"
         numLedsField.alignment = .center
         numLedsField.bezelStyle = .roundedBezel
         numLedsField.drawsBackground = false
+        numLedsField.delegate = self
+        numLedsField.tag = 0
         expandedContainer.addSubview(numLedsField)
+
+        // Horizontal Axis Label
+        xAxisLabel.translatesAutoresizingMaskIntoConstraints = false
+        xAxisLabel.isBordered = false
+        xAxisLabel.bezelStyle = .shadowlessSquare
+        xAxisLabel.title = "Horizontal axis:"
+        xAxisLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        xAxisLabel.imagePosition = .imageLeft
+        xAxisLabel.alignment = .left
+        (xAxisLabel.cell as? NSButtonCell)?.highlightsBy = []
+        xAxisLabel.image = paddedImage(systemName: "x.circle")
+        xAxisLabel.contentTintColor = .secondaryLabelColor
+        expandedContainer.addSubview(xAxisLabel)
+
+        // Horizontal Axis Field
+        xAxisField.translatesAutoresizingMaskIntoConstraints = false
+        xAxisField.stringValue = "37"
+        xAxisField.alignment = .center
+        xAxisField.bezelStyle = .roundedBezel
+        xAxisField.drawsBackground = false
+        xAxisField.delegate = self
+        xAxisField.tag = 1
+        expandedContainer.addSubview(xAxisField)
+
+        // Vertical Axis Label
+        yAxisLabel.translatesAutoresizingMaskIntoConstraints = false
+        yAxisLabel.isBordered = false
+        yAxisLabel.bezelStyle = .shadowlessSquare
+        yAxisLabel.title = "Vertical Axis:"
+        yAxisLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        yAxisLabel.imagePosition = .imageLeft
+        yAxisLabel.alignment = .left
+        (yAxisLabel.cell as? NSButtonCell)?.highlightsBy = []
+        yAxisLabel.image = paddedImage(systemName: "y.circle")
+        yAxisLabel.contentTintColor = .secondaryLabelColor
+        expandedContainer.addSubview(yAxisLabel)
+
+        // Vertical Axis Field
+        yAxisField.translatesAutoresizingMaskIntoConstraints = false
+        yAxisField.stringValue = "20"
+        yAxisField.alignment = .center
+        yAxisField.bezelStyle = .roundedBezel
+        yAxisField.drawsBackground = false
+        yAxisField.delegate = self
+        yAxisField.tag = 2
+        expandedContainer.addSubview(yAxisField)
 
         // Quit Button
         quitButton.translatesAutoresizingMaskIntoConstraints = false
@@ -192,8 +240,24 @@ extension PopoverViewController {
             numLedsField.widthAnchor.constraint(equalToConstant: 60),
             numLedsField.heightAnchor.constraint(equalToConstant: 22),
 
+            xAxisLabel.leadingAnchor.constraint(equalTo: expandedContainer.leadingAnchor, constant: 20),
+            xAxisLabel.topAnchor.constraint(equalTo: numLedsLabel.bottomAnchor, constant: 5),
+
+            xAxisField.trailingAnchor.constraint(equalTo: expandedContainer.trailingAnchor, constant: -20),
+            xAxisField.centerYAnchor.constraint(equalTo: xAxisLabel.centerYAnchor),
+            xAxisField.widthAnchor.constraint(equalToConstant: 60),
+            xAxisField.heightAnchor.constraint(equalToConstant: 22),
+
+            yAxisLabel.leadingAnchor.constraint(equalTo: expandedContainer.leadingAnchor, constant: 20),
+            yAxisLabel.topAnchor.constraint(equalTo: xAxisLabel.bottomAnchor, constant: 5),
+
+            yAxisField.trailingAnchor.constraint(equalTo: expandedContainer.trailingAnchor, constant: -20),
+            yAxisField.centerYAnchor.constraint(equalTo: yAxisLabel.centerYAnchor),
+            yAxisField.widthAnchor.constraint(equalToConstant: 60),
+            yAxisField.heightAnchor.constraint(equalToConstant: 22),
+
             quitButton.centerXAnchor.constraint(equalTo: expandedContainer.centerXAnchor),
-            quitButton.topAnchor.constraint(equalTo: numLedsLabel.bottomAnchor, constant: 8),
+            quitButton.topAnchor.constraint(equalTo: yAxisLabel.bottomAnchor, constant: 8),
             quitButton.widthAnchor.constraint(equalToConstant: 160),
             quitButton.heightAnchor.constraint(equalToConstant: 28),
 

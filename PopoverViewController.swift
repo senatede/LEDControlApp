@@ -21,14 +21,18 @@ class PopoverViewController: NSViewController {
     let brightnessSlider = BrightnessSliderView(frame: .zero)
     let expandButton    = NSButton()
 
-    let expandedContainer = NSView(frame: NSRect(x: 0, y: 50, width: 300, height: 130))
+    let expandedContainer = NSView(frame: NSRect(x: 0, y: 50, width: 300, height: 190))
     let separatorLine   = NSBox()
     let serialPort      = NSButton()
     let devicePopup     = NSPopUpButton()
     let numLedsLabel    = NSButton()
     let numLedsField    = NSTextField()
+    let xAxisLabel      = NSButton()
+    let xAxisField      = NSTextField()
+    let yAxisLabel      = NSButton()
+    let yAxisField      = NSTextField()
     let quitButton      = HoverButton()
-    let fpsLabel        = NSTextField(labelWithString: "FPS: 0")
+    let fpsLabel        = NSTextField(labelWithString: "FPS: -")
 
     // MARK: - Lifecycle
 
@@ -45,18 +49,19 @@ class PopoverViewController: NSViewController {
         setupBrightnessSlider()
         setupExpandedUI()
         setupExpandButton()
+        loadSettings()
     }
 
     override func viewDidAppear() {
         super.viewDidAppear()
-        preferredContentSize = NSSize(width: 300, height: isExpanded ? 180 : 70)
+        preferredContentSize = NSSize(width: 300, height: isExpanded ? 240 : 70)
     }
 
     // MARK: - UI State
 
     func updateExpandedContent() {
         let expanding = isExpanded
-        let newHeight: CGFloat = expanding ? 180 : 70
+        let newHeight: CGFloat = expanding ? 240 : 70
 
         if expanding {
             expandedContainer.isHidden = false
@@ -87,7 +92,12 @@ class PopoverViewController: NSViewController {
     func updateSerialDevices(_ devices: [String]) {
         devicePopup.removeAllItems()
         devicePopup.addItems(withTitles: devices)
-        if let first = devices.first {
+        
+        // Try to restore saved selection
+        if let saved = UserDefaults.standard.string(forKey: "selectedPort"),
+           devices.contains(saved) {
+            devicePopup.selectItem(withTitle: saved)
+        } else if let first = devices.first {
             devicePopup.selectItem(withTitle: first)
         }
     }
